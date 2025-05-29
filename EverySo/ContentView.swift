@@ -1,27 +1,56 @@
-//
-//  ContentView.swift
-//  EverySo
-//
-//  Created by Jeremy Kim on 2/20/25.
-//
-
 import SwiftUI
+import SwiftData
+
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var entries: [CountdownEntry]
+
     var body: some View {
-        ZStack(alignment: .top) {
-            VStack {
-                Image(systemName: "tv.fill")
-                    .imageScale(.large)
-                    .foregroundStyle(.tint)
-                Text("EverySo")
-                Spacer() // Push content to the top
+        NavigationStack {
+            List {
+                ForEach(entries) { entry in
+                    VStack(alignment: .leading) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(entry.title)
+                                    .font(.headline)
+                                Text(entry.details)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Text("\(entry.daysRemaining) days left")
+                                .font(.subheadline)
+                        }
+
+                        Button("Reset") {
+                            entry.lastReset = Date()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding(.top, 4)
+                    }
+                    .padding(.vertical, 8)
+                }
+                .onDelete { indexSet in
+                    for index in indexSet {
+                        modelContext.delete(entries[index])
+                    }
+                }
             }
-            .padding()
+            .navigationTitle("EverySo")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: AddEntryView()) {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: CountdownEntry.self)
 }
