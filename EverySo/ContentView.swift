@@ -5,6 +5,8 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var entries: [CountdownEntry]
+    // Track which entry the user is editing
+    @State private var entryToEdit: CountdownEntry?
 
     var body: some View {
         NavigationStack {
@@ -41,6 +43,12 @@ struct ContentView: View {
                         .padding(.top, 4)
                     }
                     .padding(.vertical, 8)
+                    .swipeActions(edge: .leading) {
+                        Button("Edit") {
+                            entryToEdit = entry
+                        }
+                        .tint(.blue)
+                    }
                 }
                 .onDelete { indexSet in
                     for index in indexSet {
@@ -55,6 +63,10 @@ struct ContentView: View {
                         Image(systemName: "plus")
                     }
                 }
+            }
+            // Present AddEntryView when editing an entry
+            .sheet(item: $entryToEdit) { entry in
+                AddEntryView(entryToEdit: entry)
             }
         }
     }
