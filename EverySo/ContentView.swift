@@ -20,8 +20,17 @@ struct ContentView: View {
                                     .foregroundColor(.secondary)
                             }
                             Spacer()
-                            Text("\(entry.daysRemaining) days left")
-                                .font(.subheadline)
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("\(entry.daysRemaining) days left")
+                                    .font(.subheadline)
+                                ProgressView(value: entry.progress)
+                                    .progressViewStyle(.linear)
+                                    .frame(width: 100)
+//                                This is for a circular visual icon
+//                                ProgressView(value: entry.progress)
+//                                    .progressViewStyle(.circular)
+//                                    .tint(.blue)
+                            }
                         }
 
                         Button("Reset") {

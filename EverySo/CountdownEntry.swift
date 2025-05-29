@@ -30,4 +30,10 @@ class CountdownEntry {
     var daysRemaining: Int {
         max(Calendar.current.dateComponents([.day], from: Date(), to: nextAvailableDate).day ?? 0, 0)
     }
+    
+    var progress: Double {
+        let elapsed = Date().timeIntervalSince(lastReset)
+        let total = Double(intervalDays * 86400) // days → seconds
+        return min(max(elapsed / total, 0), 1)
+    }
 }
