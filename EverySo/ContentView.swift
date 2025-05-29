@@ -21,7 +21,8 @@ struct ContentView: View {
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 4) {
-                                Text("\(entry.daysRemaining) days left")
+//                                Text("\(entry.daysRemaining) days left")
+                                Text(entry.timeRemainingFormatted)
                                     .font(.subheadline)
                                 ProgressView(value: entry.progress)
                                     .progressViewStyle(.linear)

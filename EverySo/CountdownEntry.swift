@@ -8,13 +8,16 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @Model
 class CountdownEntry {
+    var id: UUID = UUID()
     var title: String
     var details: String
     var lastReset: Date
     var intervalDays: Int
+    var notifyOnReady: Bool = false
 
     init(title: String, description: String, intervalDays: Int, lastReset: Date = Date()) {
         self.title = title
@@ -35,5 +38,48 @@ class CountdownEntry {
         let elapsed = Date().timeIntervalSince(lastReset)
         let total = Double(intervalDays * 86400) // days → seconds
         return min(max(elapsed / total, 0), 1)
+    }
+    
+    var countdownInterval: TimeInterval {
+        return TimeInterval(intervalDays * 86400) // days → seconds
+    }
+    
+    var timeRemainingFormatted: String {
+        let now = Date()
+        let nextDate = lastReset.addingTimeInterval(countdownInterval)
+        let remaining = max(0, nextDate.timeIntervalSince(now))
+        
+        let days = Int(remaining) / 86400
+        let hours = (Int(remaining) % 86400) / 3600
+        let minutes = (Int(remaining) % 3600) / 60
+
+        return "\(days)d \(hours)h \(minutes)m left"
+    }
+    
+    func scheduleNotification() {
+        guard notifyOnReady else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "EverySo Reminder"
+        content.body = "“\(title)” is ready again!"
+        content.sound = .default
+
+        let triggerDate = nextAvailableDate
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
+            repeats: false
+        )
+
+        let request = UNNotificationRequest(
+            identifier: id.uuidString,
+            content: content,
+            trigger: trigger
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to schedule notification: \(error)")
+            }
+        }
     }
 }

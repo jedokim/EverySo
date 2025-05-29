@@ -6,12 +6,35 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 @main
 struct EverySoApp: App {
+    @StateObject private var permissionVM = NotificationPermissionViewModel()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            PermissionPromptView()
+                .environmentObject(permissionVM)
         }
+    }
+}
+
+struct PermissionPromptView: View {
+    @EnvironmentObject var permissionVM: NotificationPermissionViewModel
+
+    var body: some View {
+        ContentView()
+            .alert("Enable Notifications?", isPresented: $permissionVM.shouldShowPermissionPrompt) {
+                Button("Allow") {
+                    permissionVM.requestNotificationPermission()
+                    permissionVM.shouldShowPermissionPrompt = false
+                }
+                Button("Not Now", role: .cancel) {
+                    permissionVM.shouldShowPermissionPrompt = false
+                }
+            } message: {
+                Text("EverySo uses notifications to remind you when your timers are ready. You can always change this later in Settings.")
+            }
     }
 }
