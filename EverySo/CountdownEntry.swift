@@ -17,17 +17,21 @@ class CountdownEntry {
     var details: String
     var lastReset: Date
     var intervalDays: Int
+    var intervalHours: Int = 0
+    var intervalMinutes: Int = 0
     var notifyOnReady: Bool = false
 
-    init(title: String, description: String, intervalDays: Int, lastReset: Date = Date()) {
+    init(title: String, description: String, intervalDays: Int, intervalHours: Int = 0, intervalMinutes: Int = 0, lastReset: Date = Date()) {
         self.title = title
         self.details = description
         self.intervalDays = intervalDays
+        self.intervalHours = intervalHours
+        self.intervalMinutes = intervalMinutes
         self.lastReset = lastReset
     }
 
     var nextAvailableDate: Date {
-        Calendar.current.date(byAdding: .day, value: intervalDays, to: lastReset) ?? Date()
+        lastReset.addingTimeInterval(countdownInterval)
     }
 
     var daysRemaining: Int {
@@ -36,12 +40,15 @@ class CountdownEntry {
     
     var progress: Double {
         let elapsed = Date().timeIntervalSince(lastReset)
-        let total = Double(intervalDays * 86400) // days → seconds
+        let total = countdownInterval
         return min(max(elapsed / total, 0), 1)
     }
     
     var countdownInterval: TimeInterval {
-        return TimeInterval(intervalDays * 86400) // days → seconds
+        let secondsFromDays = intervalDays * 86400
+        let secondsFromHours = intervalHours * 3600
+        let secondsFromMinutes = intervalMinutes * 60
+        return TimeInterval(secondsFromDays + secondsFromHours + secondsFromMinutes)
     }
     
     var timeRemainingFormatted: String {

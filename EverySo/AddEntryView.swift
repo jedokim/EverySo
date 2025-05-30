@@ -28,10 +28,9 @@ struct AddEntryView: View {
         self.entryToEdit = entryToEdit
         _title = State(initialValue: entryToEdit?.title ?? "")
         _description = State(initialValue: entryToEdit?.details ?? "")
-        let days = entryToEdit?.intervalDays ?? 0
-        _intervalDays = State(initialValue: days)
-        _intervalHours = State(initialValue: 0)
-        _intervalMinutes = State(initialValue: 0)
+        _intervalDays = State(initialValue: entryToEdit?.intervalDays ?? 0)
+        _intervalHours = State(initialValue: entryToEdit?.intervalHours ?? 0)
+        _intervalMinutes = State(initialValue: entryToEdit?.intervalMinutes ?? 0)
         _notifyOnReady = State(initialValue: entryToEdit?.notifyOnReady ?? false)
     }
 
@@ -47,15 +46,21 @@ struct AddEntryView: View {
             }
 
             Button(entryToEdit == nil ? "Add Entry" : "Save Changes") {
-                let totalIntervalInSeconds = TimeInterval(intervalDays * 86400 + intervalHours * 3600 + intervalMinutes * 60)
-                let totalIntervalInDays = Int(totalIntervalInSeconds / 86400)
                 if let existing = entryToEdit {
                     existing.title = title
                     existing.details = description
-                    existing.intervalDays = totalIntervalInDays
+                    existing.intervalDays = intervalDays
+                    existing.intervalHours = intervalHours
+                    existing.intervalMinutes = intervalMinutes
                     existing.notifyOnReady = notifyOnReady
                 } else {
-                    let newEntry = CountdownEntry(title: title, description: description, intervalDays: totalIntervalInDays)
+                    let newEntry = CountdownEntry(
+                        title: title,
+                        description: description,
+                        intervalDays: intervalDays,
+                        intervalHours: intervalHours,
+                        intervalMinutes: intervalMinutes
+                    )
                     newEntry.notifyOnReady = notifyOnReady
                     modelContext.insert(newEntry)
                 }

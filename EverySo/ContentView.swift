@@ -24,6 +24,9 @@ struct ContentView: View {
                             Spacer()
                             VStack(alignment: .trailing, spacing: 4) {
 //                                Text("\(entry.daysRemaining) days left")
+                                Text("\(entry.intervalDays)d \(entry.intervalHours)h \(entry.intervalMinutes)m")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
                                 Text(entry.timeRemainingFormatted)
                                     .font(.subheadline)
                                 ProgressView(value: entry.progress)
