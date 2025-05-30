@@ -23,6 +23,7 @@ struct AddEntryView: View {
     @State private var intervalHours: Int
     @State private var intervalMinutes: Int
     @State private var notifyOnReady: Bool
+    @State private var showZeroTimeAlert = false
 
     init(entryToEdit: CountdownEntry? = nil) {
         self.entryToEdit = entryToEdit
@@ -46,6 +47,11 @@ struct AddEntryView: View {
             }
 
             Button(entryToEdit == nil ? "Add Entry" : "Save Changes") {
+                let totalSeconds = intervalDays * 86400 + intervalHours * 3600 + intervalMinutes * 60
+                guard totalSeconds > 0 else {
+                    showZeroTimeAlert = true
+                    return
+                }
                 if let existing = entryToEdit {
                     existing.title = title
                     existing.details = description
@@ -72,6 +78,9 @@ struct AddEntryView: View {
                 dismiss()
             }
             .disabled(title.isEmpty)
+        }
+        .alert("Countdown interval must be greater than zero.", isPresented: $showZeroTimeAlert) {
+            Button("OK", role: .cancel) { }
         }
         .navigationTitle(entryToEdit == nil ? "Add Entry" : "Edit Entry")
     }

@@ -12,40 +12,43 @@ struct ContentView: View {
         NavigationStack {
             List {
                 ForEach(entries) { entry in
-                    VStack(alignment: .leading) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(entry.title)
-                                    .font(.headline)
-                                Text(entry.details)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            VStack(alignment: .trailing, spacing: 4) {
+                    ZStack {
+                        VStack(alignment: .leading) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(entry.title + (entry.progress >= 1 ? " (Done)" : ""))
+                                        .font(.headline)
+                                    Text(entry.details)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                VStack(alignment: .trailing, spacing: 4) {
 //                                Text("\(entry.daysRemaining) days left")
-                                Text("\(entry.intervalDays)d \(entry.intervalHours)h \(entry.intervalMinutes)m")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                Text(entry.timeRemainingFormatted)
-                                    .font(.subheadline)
-                                ProgressView(value: entry.progress)
-                                    .progressViewStyle(.linear)
-                                    .frame(width: 100)
+                                    Text("\(entry.intervalDays)d \(entry.intervalHours)h \(entry.intervalMinutes)m")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                    Text(entry.timeRemainingFormatted)
+                                        .font(.subheadline)
+                                    ProgressView(value: entry.progress)
+                                        .progressViewStyle(.linear)
+                                        .frame(width: 100)
 //                                This is for a circular visual icon
 //                                ProgressView(value: entry.progress)
 //                                    .progressViewStyle(.circular)
 //                                    .tint(.blue)
+                                }
                             }
-                        }
 
-                        Button("Reset") {
-                            entry.lastReset = Date()
+                            Button("Reset") {
+                                entry.lastReset = Date()
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .padding(.top, 4)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .padding(.top, 4)
+                        .padding(.vertical, 8)
                     }
-                    .padding(.vertical, 8)
+                    .listRowBackground(entry.progress >= 1 ? Color.green.opacity(0.1) : Color.clear)
                     .swipeActions(edge: .leading) {
                         Button("Edit") {
                             entryToEdit = entry
