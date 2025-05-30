@@ -38,6 +38,12 @@ class CountdownEntry {
         max(Calendar.current.dateComponents([.day], from: Date(), to: nextAvailableDate).day ?? 0, 0)
     }
     
+    var secondsRemaining: Int {
+        let now = Date()
+        let nextDate = lastReset.addingTimeInterval(countdownInterval)
+        return max(Int(nextDate.timeIntervalSince(now)), 0)
+    }
+    
     var progress: Double {
         let elapsed = Date().timeIntervalSince(lastReset)
         let total = countdownInterval
@@ -55,12 +61,16 @@ class CountdownEntry {
         let now = Date()
         let nextDate = lastReset.addingTimeInterval(countdownInterval)
         let remaining = max(0, nextDate.timeIntervalSince(now))
-        
-        let days = Int(remaining) / 86400
-        let hours = (Int(remaining) % 86400) / 3600
-        let minutes = (Int(remaining) % 3600) / 60
 
-        return "\(days)d \(hours)h \(minutes)m left"
+        if remaining < 60 {
+            let seconds = Int(remaining)
+            return "\(seconds)s left"
+        } else {
+            let days = Int(remaining) / 86400
+            let hours = (Int(remaining) % 86400) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "\(days)d \(hours)h \(minutes)m left"
+        }
     }
     
     func scheduleNotification() {
