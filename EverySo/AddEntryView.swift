@@ -110,7 +110,7 @@ struct AddEntryView: View {
 
     /// The section containing the countdown input fields.
     private var countdownSection: some View {
-        Section(header: Text("New Countdown")) {
+        Section(header: Text(entryToEdit == nil ? "New Countdown" : "Edit Countdown")) {
             // Title and Description
             TextField("Title", text: $title)
             TextField("Description", text: $description)
