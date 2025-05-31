@@ -5,9 +5,9 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var entries: [CountdownEntry]
-    // Track which entry the user is editing
     @State private var entryToEdit: CountdownEntry?
     @StateObject private var clock = Clock()
+    @State private var isDarkMode = false
 
     var body: some View {
         NavigationStack {
@@ -69,6 +69,13 @@ struct ContentView: View {
             }
             .navigationTitle("EverySo")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        isDarkMode.toggle()
+                    }) {
+                        Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: AddEntryView()) {
                         Image(systemName: "plus")
@@ -80,6 +87,8 @@ struct ContentView: View {
                 AddEntryView(entryToEdit: entry)
             }
         }
+        .background(Color(isDarkMode ? .black : .white).edgesIgnoringSafeArea(.all))
+        .preferredColorScheme(isDarkMode ? .dark : .light)
     }
 }
 
