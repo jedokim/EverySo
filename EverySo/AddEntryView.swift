@@ -8,7 +8,7 @@
 import SwiftData
 import SwiftUI
 
-
+/// A view for adding or editing a countdown entry.
 struct AddEntryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -16,16 +16,31 @@ struct AddEntryView: View {
     // Holds the entry being edited (nil when adding a new one)
     var entryToEdit: CountdownEntry?
 
-    // State fields prefilled by initializer
+    // MARK: - Constants
+
+    private let maxDays = 365
+    private let maxHours = 23
+    private let maxMinutes = 59
+
+    // MARK: - State Properties
+
+    // Title and Description
     @State private var title: String
     @State private var description: String
+
+    // Interval Components
     @State private var intervalDays: Int
     @State private var intervalHours: Int
     @State private var intervalMinutes: Int
+
+    // Settings
     @State private var notifyOnReady: Bool
     @State private var resetOnSave: Bool
+
+    // Alert state
     @State private var showZeroTimeAlert = false
 
+    /// Initializes the view with an optional entry to edit.
     init(entryToEdit: CountdownEntry? = nil) {
         self.entryToEdit = entryToEdit
         _title = State(initialValue: entryToEdit?.title ?? "")
@@ -39,18 +54,10 @@ struct AddEntryView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("New Countdown")) {
-                TextField("Title", text: $title)
-                TextField("Description", text: $description)
-                Stepper("Days: \(intervalDays)", value: $intervalDays, in: 0...365)
-                Stepper("Hours: \(intervalHours)", value: $intervalHours, in: 0...23)
-                Stepper("Minutes: \(intervalMinutes)", value: $intervalMinutes, in: 0...59)
-                Toggle("Remind me when ready", isOn: $notifyOnReady)
-                Toggle("Reset on save", isOn: $resetOnSave)
-            }
+            countdownSection
 
             Button(entryToEdit == nil ? "Add Entry" : "Save Changes") {
-                let totalSeconds = intervalDays * 86400 + intervalHours * 3600 + intervalMinutes * 60
+                let totalSeconds = totalIntervalInSeconds()
                 guard totalSeconds > 0 else {
                     showZeroTimeAlert = true
                     return
@@ -90,5 +97,32 @@ struct AddEntryView: View {
             Button("OK", role: .cancel) { }
         }
         .navigationTitle(entryToEdit == nil ? "Add Entry" : "Edit Entry")
+    }
+
+    // MARK: - Private Helpers
+
+    /// Computes the total interval in seconds based on days, hours, and minutes.
+    private func totalIntervalInSeconds() -> Int {
+        return intervalDays * 86400 + intervalHours * 3600 + intervalMinutes * 60
+    }
+
+    // MARK: - View Components
+
+    /// The section containing the countdown input fields.
+    private var countdownSection: some View {
+        Section(header: Text("New Countdown")) {
+            // Title and Description
+            TextField("Title", text: $title)
+            TextField("Description", text: $description)
+
+            // Interval pickers
+            Stepper("Days: \(intervalDays)", value: $intervalDays, in: 0...maxDays)
+            Stepper("Hours: \(intervalHours)", value: $intervalHours, in: 0...maxHours)
+            Stepper("Minutes: \(intervalMinutes)", value: $intervalMinutes, in: 0...maxMinutes)
+
+            // Settings toggles
+            Toggle("Remind me when ready", isOn: $notifyOnReady)
+            Toggle("Reset on save", isOn: $resetOnSave)
+        }
     }
 }

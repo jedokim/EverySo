@@ -10,18 +10,50 @@ import SwiftUI
 import SwiftData
 import UserNotifications
 
+/// A model representing a countdown entry with a title, details, and interval.
+/// Tracks the last reset date and calculates the next available date based on the interval.
+/// Supports notifications when the countdown is ready again.
 @Model
 class CountdownEntry {
+    // MARK: - Properties
+    
+    /// Unique identifier for the countdown entry.
     var id: UUID = UUID()
+    
+    /// Title of the countdown entry.
     var title: String
+    
+    /// Detailed description of the countdown entry.
     var details: String
+    
+    /// The date when the countdown was last reset.
     var lastReset: Date
+    
+    /// Interval days for the countdown.
     var intervalDays: Int
+    
+    /// Interval hours for the countdown.
     var intervalHours: Int = 0
+    
+    /// Interval minutes for the countdown.
     var intervalMinutes: Int = 0
+    
+    /// Flag indicating whether to notify when the countdown is ready.
     var notifyOnReady: Bool = false
+    
+    /// Flag indicating whether to reset on save.
     var resetOnSave: Bool = false
 
+    // MARK: - Initialization
+    
+    /// Initializes a new CountdownEntry.
+    /// - Parameters:
+    ///   - title: The title of the countdown.
+    ///   - description: The detailed description.
+    ///   - intervalDays: Interval in days.
+    ///   - intervalHours: Interval in hours (default 0).
+    ///   - intervalMinutes: Interval in minutes (default 0).
+    ///   - lastReset: The date of last reset (default current date).
     init(title: String, description: String, intervalDays: Int, intervalHours: Int = 0, intervalMinutes: Int = 0, lastReset: Date = Date()) {
         self.title = title
         self.details = description
@@ -30,27 +62,10 @@ class CountdownEntry {
         self.intervalMinutes = intervalMinutes
         self.lastReset = lastReset
     }
-
-    var nextAvailableDate: Date {
-        lastReset.addingTimeInterval(countdownInterval)
-    }
-
-    var daysRemaining: Int {
-        max(Calendar.current.dateComponents([.day], from: Date(), to: nextAvailableDate).day ?? 0, 0)
-    }
     
-    var secondsRemaining: Int {
-        let now = Date()
-        let nextDate = lastReset.addingTimeInterval(countdownInterval)
-        return max(Int(nextDate.timeIntervalSince(now)), 0)
-    }
+    // MARK: - Computed Properties
     
-    var progress: Double {
-        let elapsed = Date().timeIntervalSince(lastReset)
-        let total = countdownInterval
-        return min(max(elapsed / total, 0), 1)
-    }
-    
+    /// The total countdown interval in seconds.
     var countdownInterval: TimeInterval {
         let secondsFromDays = intervalDays * 86400
         let secondsFromHours = intervalHours * 3600
@@ -58,27 +73,40 @@ class CountdownEntry {
         return TimeInterval(secondsFromDays + secondsFromHours + secondsFromMinutes)
     }
     
-//    var timeRemainingFormatted: String {
-//        let now = Date()
-//        let nextDate = lastReset.addingTimeInterval(countdownInterval)
-//        let remaining = max(0, nextDate.timeIntervalSince(now))
-//
-//        if remaining < 60 {
-//            let seconds = Int(remaining)
-//            return "\(seconds)s left"
-//        } else {
-//            let days = Int(remaining) / 86400
-//            let hours = (Int(remaining) % 86400) / 3600
-//            let minutes = (Int(remaining) % 3600) / 60
-//            return "\(days)d \(hours)h \(minutes)m left"
-//        }
-//    }
+    /// The next date when the countdown will be available.
+    var nextAvailableDate: Date {
+        lastReset.addingTimeInterval(countdownInterval)
+    }
     
+    /// The number of full days remaining until the countdown is ready.
+    var daysRemaining: Int {
+        max(Calendar.current.dateComponents([.day], from: Date(), to: nextAvailableDate).day ?? 0, 0)
+    }
+    
+    /// The number of seconds remaining until the countdown is ready.
+    var secondsRemaining: Int {
+        let now = Date()
+        return max(Int(nextAvailableDate.timeIntervalSince(now)), 0)
+    }
+    
+    /// The progress of the countdown as a value between 0 and 1.
+    var progress: Double {
+        progress(from: Date())
+    }
+    
+    // MARK: - Time Calculation Methods
+    
+    /// Calculates the time remaining from a given date.
+    /// - Parameter now: The current date to calculate from.
+    /// - Returns: Time interval remaining, or zero if passed.
     func timeRemaining(from now: Date) -> TimeInterval {
         let nextResetDate = lastReset.addingTimeInterval(countdownInterval)
         return max(nextResetDate.timeIntervalSince(now), 0)
     }
-
+    
+    /// Formats the time remaining from a given date into a user-friendly string.
+    /// - Parameter now: The current date to calculate from.
+    /// - Returns: A formatted string representing the time left.
     func formattedTimeRemaining(from now: Date) -> String {
         let remaining = timeRemaining(from: now)
         if remaining < 60 {
@@ -105,13 +133,20 @@ class CountdownEntry {
             return components.joined(separator: " ") + " left"
         }
     }
-
-    func progress(from now: Date) -> Double {
-        let elapsed = now.timeIntervalSince(lastReset)
+    
+    /// Calculates the progress of the countdown from a given date.
+    /// - Parameter now: The current date to calculate from. Defaults to current date.
+    /// - Returns: A Double between 0 and 1 representing progress.
+    func progress(from now: Date = Date()) -> Double {
         let total = countdownInterval
+        guard total > 0 else { return 1 }
+        let elapsed = now.timeIntervalSince(lastReset)
         return min(max(elapsed / total, 0), 1)
     }
     
+    // MARK: - Notification
+    
+    /// Schedules a notification for when the countdown is ready again.
     func scheduleNotification() {
         guard notifyOnReady else { return }
 

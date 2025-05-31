@@ -1,10 +1,19 @@
+//
+//  EverySoTests.swift
+//  EverySoTests
+//
+//  Created by Jeremy Kim on 2/20/25.
+//
+
 import SwiftUI
 import SwiftData
 
-
+/// The main view displaying a list of countdown entries with progress tracking and editing capabilities.
 struct ContentView: View {
+    // MARK: - Environment and State
     @Environment(\.modelContext) private var modelContext
     @Query private var entries: [CountdownEntry]
+    
     @State private var entryToEdit: CountdownEntry?
     @StateObject private var clock = Clock()
     @State private var isDarkMode = false
@@ -13,11 +22,14 @@ struct ContentView: View {
         NavigationStack {
             List {
                 ForEach(entries) { entry in
+                    let progress = entry.progress(from: clock.now)
+                    let rowBackground = progress >= 1 ? (isDarkMode ? Color.green.opacity(0.3) : Color.green.opacity(0.2)) : Color.clear
+                    
                     ZStack {
                         VStack(alignment: .leading) {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(entry.title + (entry.progress >= 1 ? " (Done)" : ""))
+                                    Text(entry.title + (progress >= 1 ? " (Done)" : ""))
                                         .font(.headline)
                                     Text(entry.details)
                                         .font(.subheadline)
@@ -25,23 +37,14 @@ struct ContentView: View {
                                 }
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 4) {
-//                                Text("\(entry.daysRemaining) days left")
-//                                    Text("\(entry.intervalDays)d \(entry.intervalHours)h \(entry.intervalMinutes)m")
-//                                    Text("Progress: \(Int(entry.progress(from: clock.now) * 100))%")
-//                                        .font(.caption)
-//                                        .foregroundColor(.blue)
-                                    Text("Progress: \(Int(entry.progress(from: clock.now) * 100))%")
+                                    Text("Progress: \(Int(progress * 100))%")
                                         .font(.caption)
                                         .foregroundColor(.blue)
                                     Text(entry.formattedTimeRemaining(from: clock.now))
                                         .font(.subheadline)
-                                    ProgressView(value: entry.progress(from: clock.now))
+                                    ProgressView(value: progress)
                                         .progressViewStyle(.linear)
                                         .frame(width: 100)
-//                                This is for a circular visual icon
-//                                ProgressView(value: entry.progress)
-//                                    .progressViewStyle(.circular)
-//                                    .tint(.blue)
                                 }
                             }
 
@@ -53,7 +56,7 @@ struct ContentView: View {
                         }
                         .padding(.vertical, 8)
                     }
-                    .listRowBackground(entry.progress >= 1 ? Color.green.opacity(0.1) : Color.clear)
+                    .listRowBackground(rowBackground)
                     .swipeActions(edge: .leading) {
                         Button("Edit") {
                             entryToEdit = entry
