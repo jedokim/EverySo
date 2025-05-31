@@ -57,22 +57,7 @@ class CountdownEntry {
         let secondsFromMinutes = intervalMinutes * 60
         return TimeInterval(secondsFromDays + secondsFromHours + secondsFromMinutes)
     }
-    
-//    var timeRemainingFormatted: String {
-//        let now = Date()
-//        let nextDate = lastReset.addingTimeInterval(countdownInterval)
-//        let remaining = max(0, nextDate.timeIntervalSince(now))
-//
-//        if remaining < 60 {
-//            let seconds = Int(remaining)
-//            return "\(seconds)s left"
-//        } else {
-//            let days = Int(remaining) / 86400
-//            let hours = (Int(remaining) % 86400) / 3600
-//            let minutes = (Int(remaining) % 3600) / 60
-//            return "\(days)d \(hours)h \(minutes)m left"
-//        }
-//    }
+
     
     func timeRemaining(from now: Date) -> TimeInterval {
         let nextResetDate = lastReset.addingTimeInterval(countdownInterval)

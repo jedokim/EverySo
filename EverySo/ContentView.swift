@@ -25,11 +25,6 @@ struct ContentView: View {
                                 }
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 4) {
-//                                Text("\(entry.daysRemaining) days left")
-//                                    Text("\(entry.intervalDays)d \(entry.intervalHours)h \(entry.intervalMinutes)m")
-//                                    Text("Progress: \(Int(entry.progress(from: clock.now) * 100))%")
-//                                        .font(.caption)
-//                                        .foregroundColor(.blue)
                                     Text("Progress: \(Int(entry.progress(from: clock.now) * 100))%")
                                         .font(.caption)
                                         .foregroundColor(.blue)
@@ -38,10 +33,6 @@ struct ContentView: View {
                                     ProgressView(value: entry.progress(from: clock.now))
                                         .progressViewStyle(.linear)
                                         .frame(width: 100)
-//                                This is for a circular visual icon
-//                                ProgressView(value: entry.progress)
-//                                    .progressViewStyle(.circular)
-//                                    .tint(.blue)
                                 }
                             }
 
