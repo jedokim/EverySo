@@ -7,6 +7,7 @@ struct ContentView: View {
     @Query private var entries: [CountdownEntry]
     // Track which entry the user is editing
     @State private var entryToEdit: CountdownEntry?
+    @StateObject private var clock = Clock()
 
     var body: some View {
         NavigationStack {
@@ -25,12 +26,13 @@ struct ContentView: View {
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 4) {
 //                                Text("\(entry.daysRemaining) days left")
-                                    Text("\(entry.intervalDays)d \(entry.intervalHours)h \(entry.intervalMinutes)m")
+//                                    Text("\(entry.intervalDays)d \(entry.intervalHours)h \(entry.intervalMinutes)m")
+                                    Text(entry.formattedTimeRemaining(from: clock.now))
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                     Text(entry.timeRemainingFormatted)
                                         .font(.subheadline)
-                                    ProgressView(value: entry.progress)
+                                    ProgressView(value: entry.progress(from: clock.now))
                                         .progressViewStyle(.linear)
                                         .frame(width: 100)
 //                                This is for a circular visual icon

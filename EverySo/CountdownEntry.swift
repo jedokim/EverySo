@@ -73,6 +73,30 @@ class CountdownEntry {
         }
     }
     
+    func timeRemaining(from now: Date) -> TimeInterval {
+        let nextResetDate = lastReset.addingTimeInterval(countdownInterval)
+        return max(nextResetDate.timeIntervalSince(now), 0)
+    }
+
+    func formattedTimeRemaining(from now: Date) -> String {
+        let remaining = timeRemaining(from: now)
+        if remaining < 60 {
+            let seconds = Int(remaining)
+            return "\(seconds)s left"
+        } else {
+            let days = Int(remaining) / 86400
+            let hours = (Int(remaining) % 86400) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "\(days)d \(hours)h \(minutes)m left"
+        }
+    }
+
+    func progress(from now: Date) -> Double {
+        let elapsed = now.timeIntervalSince(lastReset)
+        let total = countdownInterval
+        return min(max(elapsed / total, 0), 1)
+    }
+    
     func scheduleNotification() {
         guard notifyOnReady else { return }
 
