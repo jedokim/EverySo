@@ -23,6 +23,7 @@ struct AddEntryView: View {
     @State private var intervalHours: Int
     @State private var intervalMinutes: Int
     @State private var notifyOnReady: Bool
+    @State private var resetOnSave: Bool
     @State private var showZeroTimeAlert = false
 
     init(entryToEdit: CountdownEntry? = nil) {
@@ -33,6 +34,7 @@ struct AddEntryView: View {
         _intervalHours = State(initialValue: entryToEdit?.intervalHours ?? 0)
         _intervalMinutes = State(initialValue: entryToEdit?.intervalMinutes ?? 0)
         _notifyOnReady = State(initialValue: entryToEdit?.notifyOnReady ?? false)
+        _resetOnSave = State(initialValue: entryToEdit?.resetOnSave ?? false)
     }
 
     var body: some View {
@@ -44,6 +46,7 @@ struct AddEntryView: View {
                 Stepper("Hours: \(intervalHours)", value: $intervalHours, in: 0...23)
                 Stepper("Minutes: \(intervalMinutes)", value: $intervalMinutes, in: 0...59)
                 Toggle("Remind me when ready", isOn: $notifyOnReady)
+                Toggle("Reset on save", isOn: $resetOnSave)
             }
 
             Button(entryToEdit == nil ? "Add Entry" : "Save Changes") {
@@ -59,6 +62,10 @@ struct AddEntryView: View {
                     existing.intervalHours = intervalHours
                     existing.intervalMinutes = intervalMinutes
                     existing.notifyOnReady = notifyOnReady
+                    existing.resetOnSave = resetOnSave
+                    if resetOnSave {
+                        existing.lastReset = Date()
+                    }
                 } else {
                     let newEntry = CountdownEntry(
                         title: title,

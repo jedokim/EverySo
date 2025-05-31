@@ -6,6 +6,8 @@
 //
 
 import Testing
+import SwiftUI
+import SwiftData
 @testable import EverySo
 
 struct EverySoTests {
@@ -14,35 +16,28 @@ struct EverySoTests {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
     }
 
-    @Test
-    func testCountdownInitialization() async throws {
-        let entry = CountdownEntry(title: "Beer Time", description: "Monthly reward", intervalDays: <#T##Int#>: 30, intervalHours: <#T##Int#>: 0, intervalMinutes: <#T##Int#>: 0)
-        #expect(entry.title == "Beer Time")
-        #expect(entry.description == "Monthly reward")
-        #expect(entry.totalDuration == 30 * 24 * 60 * 60)
+    @Test func testTimeRemainingFutureEvent() {
+        let now = Date()
+        let futureDate = now.addingTimeInterval(3600) // 1 hour later
+        let entry = CountdownEntry(date: now, targetDate: futureDate, title: "Test Event", id: UUID())
+        let remaining = entry.timeRemaining(from: now)
+        #expect(remaining).toBeClose(to: 3600, within: 1)
     }
 
-    @Test
-    func testCountdownReset() async throws {
-        var entry = CountdownEntry(title: "Reset Test", description: "", durationDays: 0, durationHours: 1, durationMinutes: 0)
-        let originalStart = entry.startTime
-        try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second
-        entry.reset()
-        #expect(entry.startTime > originalStart)
+    @Test func testFormattedTimeRemaining() {
+        let now = Date()
+        let futureDate = now.addingTimeInterval(3661) // 1 hour, 1 minute, 1 second later
+        let entry = CountdownEntry(date: now, targetDate: futureDate, title: "Test Event", id: UUID())
+        let formatted = entry.formattedTimeRemaining(from: now)
+        #expect(formatted).toEqual("1h 1m 1s")
     }
 
-    @Test
-    func testTimeRemainingCalculation() async throws {
-        let entry = CountdownEntry(title: "Test", description: "", durationDays: 0, durationHours: 0, durationMinutes: 1)
-        #expect(entry.timeRemaining <= 60)
-        #expect(entry.timeRemaining > 0)
+    @Test func testProgressFraction() {
+        let startDate = Date()
+        let endDate = startDate.addingTimeInterval(100)
+        let entry = CountdownEntry(date: startDate, targetDate: endDate, title: "Test Event", id: UUID())
+        let halfwayDate = startDate.addingTimeInterval(50)
+        let progress = entry.progress(from: halfwayDate)
+        #expect(progress).toBeClose(to: 0.5, within: 0.01)
     }
-
-    @Test
-    func testZeroDurationIsInvalid() async throws {
-        let entry = CountdownEntry(title: "Zero Test", description: "", durationDays: 0, durationHours: 0, durationMinutes: 0)
-        #expect(entry.totalDuration == 0)
-        #expect(entry.isValid == false)
-    }
-
 }

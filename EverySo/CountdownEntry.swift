@@ -20,6 +20,7 @@ class CountdownEntry {
     var intervalHours: Int = 0
     var intervalMinutes: Int = 0
     var notifyOnReady: Bool = false
+    var resetOnSave: Bool = false
 
     init(title: String, description: String, intervalDays: Int, intervalHours: Int = 0, intervalMinutes: Int = 0, lastReset: Date = Date()) {
         self.title = title
@@ -57,21 +58,21 @@ class CountdownEntry {
         return TimeInterval(secondsFromDays + secondsFromHours + secondsFromMinutes)
     }
     
-    var timeRemainingFormatted: String {
-        let now = Date()
-        let nextDate = lastReset.addingTimeInterval(countdownInterval)
-        let remaining = max(0, nextDate.timeIntervalSince(now))
-
-        if remaining < 60 {
-            let seconds = Int(remaining)
-            return "\(seconds)s left"
-        } else {
-            let days = Int(remaining) / 86400
-            let hours = (Int(remaining) % 86400) / 3600
-            let minutes = (Int(remaining) % 3600) / 60
-            return "\(days)d \(hours)h \(minutes)m left"
-        }
-    }
+//    var timeRemainingFormatted: String {
+//        let now = Date()
+//        let nextDate = lastReset.addingTimeInterval(countdownInterval)
+//        let remaining = max(0, nextDate.timeIntervalSince(now))
+//
+//        if remaining < 60 {
+//            let seconds = Int(remaining)
+//            return "\(seconds)s left"
+//        } else {
+//            let days = Int(remaining) / 86400
+//            let hours = (Int(remaining) % 86400) / 3600
+//            let minutes = (Int(remaining) % 3600) / 60
+//            return "\(days)d \(hours)h \(minutes)m left"
+//        }
+//    }
     
     func timeRemaining(from now: Date) -> TimeInterval {
         let nextResetDate = lastReset.addingTimeInterval(countdownInterval)
@@ -83,11 +84,25 @@ class CountdownEntry {
         if remaining < 60 {
             let seconds = Int(remaining)
             return "\(seconds)s left"
+        } else if remaining < 3600 {
+            let minutes = Int(remaining) / 60
+            let seconds = Int(remaining) % 60
+            return "\(minutes)m \(seconds)s left"
         } else {
             let days = Int(remaining) / 86400
             let hours = (Int(remaining) % 86400) / 3600
             let minutes = (Int(remaining) % 3600) / 60
-            return "\(days)d \(hours)h \(minutes)m left"
+            
+            var components: [String] = []
+            if days > 0 {
+                components.append("\(days)d")
+            }
+            if hours > 0 {
+                components.append("\(hours)h")
+            }
+            components.append("\(minutes)m")
+            
+            return components.joined(separator: " ") + " left"
         }
     }
 
