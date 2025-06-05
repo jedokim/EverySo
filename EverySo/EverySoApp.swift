@@ -25,6 +25,7 @@ struct PermissionPromptView: View {
 
     var body: some View {
         ContentView()
+            .modelContainer(for: CountdownEntry.self)
             .alert("Enable Notifications?", isPresented: $permissionVM.shouldShowPermissionPrompt) {
                 Button("Allow") {
                     permissionVM.requestNotificationPermission()
