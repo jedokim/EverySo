@@ -82,6 +82,7 @@ struct AddEntryView: View {
                         intervalMinutes: intervalMinutes
                     )
                     newEntry.notifyOnReady = notifyOnReady
+                    newEntry.resetOnSave = resetOnSave
                     modelContext.insert(newEntry)
                 }
                 do {
