@@ -9,7 +9,24 @@ import Foundation
 import UserNotifications
 
 class NotificationPermissionViewModel: ObservableObject {
-    @Published var shouldShowPermissionPrompt = true  // set to false after first prompt
+    @Published var shouldShowPermissionPrompt = false
+
+    init() {
+        checkNotificationPermission()
+    }
+
+    private func checkNotificationPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                switch settings.authorizationStatus {
+                case .notDetermined:
+                    self.shouldShowPermissionPrompt = true
+                default:
+                    self.shouldShowPermissionPrompt = false
+                }
+            }
+        }
+    }
 
     func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
@@ -18,6 +35,8 @@ class NotificationPermissionViewModel: ObservableObject {
             } else {
                 print("Notification permission granted: \(granted)")
             }
+            // After requesting, update permission prompt state
+            self.checkNotificationPermission()
         }
     }
 }
