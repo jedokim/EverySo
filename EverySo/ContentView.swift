@@ -49,7 +49,7 @@ struct ContentView: View {
                             }
 
                             Button("Reset") {
-                                entry.lastReset = Date()
+                                entry.resetCountdown()
                             }
                             .buttonStyle(.borderedProminent)
                             .padding(.top, 4)

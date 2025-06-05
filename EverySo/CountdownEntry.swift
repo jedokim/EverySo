@@ -54,6 +54,8 @@ class CountdownEntry {
     ///   - intervalHours: Interval in hours (default 0).
     ///   - intervalMinutes: Interval in minutes (default 0).
     ///   - lastReset: The date of last reset (default current date).
+    /// Note: scheduleNotification() is called here to ensure a notification is scheduled when a new CountdownEntry is created.
+    ///       If the countdown timer is reset elsewhere, scheduleNotification() should be called after resetting as well.
     init(title: String, description: String, intervalDays: Int, intervalHours: Int = 0, intervalMinutes: Int = 0, lastReset: Date = Date()) {
         self.title = title
         self.details = description
@@ -61,6 +63,7 @@ class CountdownEntry {
         self.intervalHours = intervalHours
         self.intervalMinutes = intervalMinutes
         self.lastReset = lastReset
+        self.scheduleNotification()
     }
     
     // MARK: - Computed Properties
@@ -149,15 +152,16 @@ class CountdownEntry {
     /// Schedules a notification for when the countdown is ready again.
     func scheduleNotification() {
         guard notifyOnReady else { return }
+        let triggerDate = nextAvailableDate
+        guard triggerDate > Date() else { return }
 
         let content = UNMutableNotificationContent()
         content.title = "EverySo Reminder"
         content.body = "“\(title)” is ready again!"
         content.sound = .default
 
-        let triggerDate = nextAvailableDate
         let trigger = UNCalendarNotificationTrigger(
-            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate),
             repeats: false
         )
 
@@ -172,5 +176,17 @@ class CountdownEntry {
                 print("Failed to schedule notification: \(error)")
             }
         }
+    }
+
+    /// Resets the countdown to now and schedules a notification.
+    func resetCountdown() {
+        // Remove any existing notification for this countdown
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id.uuidString])
+        
+        // Update the last reset date to now
+        self.lastReset = Date()
+        
+        // Schedule a new notification
+        scheduleNotification()
     }
 }

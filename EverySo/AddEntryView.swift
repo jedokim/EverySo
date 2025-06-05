@@ -72,6 +72,7 @@ struct AddEntryView: View {
                     existing.resetOnSave = resetOnSave
                     if resetOnSave {
                         existing.lastReset = Date()
+                        existing.resetCountdown()
                     }
                 } else {
                     let newEntry = CountdownEntry(
