@@ -33,12 +33,26 @@ struct AddEntryView: View {
     @State private var intervalHours: Int
     @State private var intervalMinutes: Int
 
+    @State private var intervalDaysString: String
+    @State private var intervalHoursString: String
+    @State private var intervalMinutesString: String
+
     // Settings
     @State private var notifyOnReady: Bool
     @State private var resetOnSave: Bool
 
     // Alert state
     @State private var showZeroTimeAlert = false
+
+    // Focus state for text fields
+    @FocusState private var focusedField: Field?
+
+    // Define Focusable Fields
+    enum Field: Hashable {
+        case days
+        case hours
+        case minutes
+    }
 
     /// Initializes the view with an optional entry to edit.
     init(entryToEdit: CountdownEntry? = nil) {
@@ -50,6 +64,9 @@ struct AddEntryView: View {
         _intervalMinutes = State(initialValue: entryToEdit?.intervalMinutes ?? 0)
         _notifyOnReady = State(initialValue: entryToEdit?.notifyOnReady ?? false)
         _resetOnSave = State(initialValue: entryToEdit?.resetOnSave ?? false)
+        _intervalDaysString = State(initialValue: "\(entryToEdit?.intervalDays ?? 0)")
+        _intervalHoursString = State(initialValue: "\(entryToEdit?.intervalHours ?? 0)")
+        _intervalMinutesString = State(initialValue: "\(entryToEdit?.intervalMinutes ?? 0)")
     }
 
     var body: some View {
@@ -99,6 +116,14 @@ struct AddEntryView: View {
             Button("OK", role: .cancel) { }
         }
         .navigationTitle(entryToEdit == nil ? "Add Entry" : "Edit Entry")
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    focusedField = nil
+                }
+            }
+        }
     }
 
     // MARK: - Private Helpers
@@ -117,10 +142,83 @@ struct AddEntryView: View {
             TextField("Title", text: $title)
             TextField("Description", text: $description)
 
-            // Interval pickers
-            Stepper("Days: \(intervalDays)", value: $intervalDays, in: 0...maxDays)
-            Stepper("Hours: \(intervalHours)", value: $intervalHours, in: 0...maxHours)
-            Stepper("Minutes: \(intervalMinutes)", value: $intervalMinutes, in: 0...maxMinutes)
+            // Days Input
+            HStack {
+                Text("Days:")
+                TextField("Days", text: $intervalDaysString)
+                    .keyboardType(.numberPad)
+                    .frame(width: 60)
+                    .focused($focusedField, equals: .days)
+                    .onChange(of: intervalDaysString) {
+                        let filtered = intervalDaysString.filter { $0.isNumber }
+                        if let intValue = Int(filtered), intValue <= maxDays {
+                            intervalDays = intValue
+                            intervalDaysString = "\(intValue)"
+                        } else if filtered.isEmpty {
+                            intervalDays = 0
+                            intervalDaysString = "0"
+                        } else if let intValue = Int(filtered), intValue > maxDays {
+                            intervalDays = maxDays
+                            intervalDaysString = "\(maxDays)"
+                        }
+                    }
+                Stepper("", value: $intervalDays, in: 0...maxDays)
+                    .onChange(of: intervalDays) {
+                        intervalDaysString = "\(intervalDays)"
+                    }
+            }
+
+            // Hours Input
+            HStack {
+                Text("Hours:")
+                TextField("Hours", text: $intervalHoursString)
+                    .keyboardType(.numberPad)
+                    .frame(width: 60)
+                    .focused($focusedField, equals: .hours)
+                    .onChange(of: intervalHoursString) {
+                        let filtered = intervalHoursString.filter { $0.isNumber }
+                        if let intValue = Int(filtered), intValue <= maxHours {
+                            intervalHours = intValue
+                            intervalHoursString = "\(intValue)"
+                        } else if filtered.isEmpty {
+                            intervalHours = 0
+                            intervalHoursString = "0"
+                        } else if let intValue = Int(filtered), intValue > maxHours {
+                            intervalHours = maxHours
+                            intervalHoursString = "\(maxHours)"
+                        }
+                    }
+                Stepper("", value: $intervalHours, in: 0...maxHours)
+                    .onChange(of: intervalHours) {
+                        intervalHoursString = "\(intervalHours)"
+                    }
+            }
+
+            // Minutes Input
+            HStack {
+                Text("Minutes:")
+                TextField("Minutes", text: $intervalMinutesString)
+                    .keyboardType(.numberPad)
+                    .frame(width: 60)
+                    .focused($focusedField, equals: .minutes)
+                    .onChange(of: intervalMinutesString) {
+                        let filtered = intervalMinutesString.filter { $0.isNumber }
+                        if let intValue = Int(filtered), intValue <= maxMinutes {
+                            intervalMinutes = intValue
+                            intervalMinutesString = "\(intValue)"
+                        } else if filtered.isEmpty {
+                            intervalMinutes = 0
+                            intervalMinutesString = "0"
+                        } else if let intValue = Int(filtered), intValue > maxMinutes {
+                            intervalMinutes = maxMinutes
+                            intervalMinutesString = "\(maxMinutes)"
+                        }
+                    }
+                Stepper("", value: $intervalMinutes, in: 0...maxMinutes)
+                    .onChange(of: intervalMinutes) {
+                        intervalMinutesString = "\(intervalMinutes)"
+                    }
+            }
 
             // Settings toggles
             Toggle("Remind me when ready", isOn: $notifyOnReady)
