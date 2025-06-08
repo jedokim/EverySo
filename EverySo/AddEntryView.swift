@@ -49,6 +49,8 @@ struct AddEntryView: View {
 
     // Define Focusable Fields
     enum Field: Hashable {
+        case title
+        case description
         case days
         case hours
         case minutes
@@ -140,7 +142,9 @@ struct AddEntryView: View {
         Section(header: Text(entryToEdit == nil ? "New Countdown" : "Edit Countdown")) {
             // Title and Description
             TextField("Title", text: $title)
+                .focused($focusedField, equals: .title)
             TextField("Description", text: $description)
+                .focused($focusedField, equals: .description)
 
             // Days Input
             HStack {
