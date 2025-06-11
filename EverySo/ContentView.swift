@@ -16,7 +16,7 @@ struct ContentView: View {
     
     @State private var entryToEdit: CountdownEntry?
     @StateObject private var clock = Clock()
-    @State private var isDarkMode = false
+    @State private var isDarkMode: Bool = UserDefaults.standard.bool(forKey: "isDarkMode")
 
     /// Navigation toolbar with theme toggle and add entry button.
     private var toolbar: some ToolbarContent {
@@ -24,6 +24,7 @@ struct ContentView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
                     isDarkMode.toggle()
+                    UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
                 }) {
                     Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
                 }

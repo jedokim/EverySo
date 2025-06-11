@@ -28,7 +28,7 @@ class CountdownEntry {
 
     /// The date when the countdown was last reset.
     var lastReset: Date
-
+    
     /// Number of days for the countdown interval.
     var intervalDays: Int
 
