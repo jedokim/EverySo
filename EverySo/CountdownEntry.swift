@@ -17,31 +17,31 @@ import UserNotifications
 class CountdownEntry {
     // MARK: - Properties
     
-    /// Unique identifier for the countdown entry.
+    /// Unique identifier for the countdown entry. Immutable after creation.
     var id: UUID = UUID()
     
     /// Title of the countdown entry.
     var title: String
-    
+
     /// Detailed description of the countdown entry.
     var details: String
-    
+
     /// The date when the countdown was last reset.
     var lastReset: Date
-    
-    /// Interval days for the countdown.
+
+    /// Number of days for the countdown interval.
     var intervalDays: Int
-    
-    /// Interval hours for the countdown.
+
+    /// Number of hours for the countdown interval.
     var intervalHours: Int = 0
-    
-    /// Interval minutes for the countdown.
+
+    /// Number of minutes for the countdown interval.
     var intervalMinutes: Int = 0
-    
-    /// Flag indicating whether to notify when the countdown is ready.
+
+    /// Whether to notify when the countdown is ready.
     var notifyOnReady: Bool = false
-    
-    /// Flag indicating whether to reset on save.
+
+    /// Whether to reset the countdown on save.
     var resetOnSave: Bool = false
 
     // MARK: - Initialization
@@ -69,10 +69,11 @@ class CountdownEntry {
     // MARK: - Computed Properties
     
     /// The total countdown interval in seconds.
+    /// Ensures all interval components are non-negative.
     var countdownInterval: TimeInterval {
-        let secondsFromDays = intervalDays * 86400
-        let secondsFromHours = intervalHours * 3600
-        let secondsFromMinutes = intervalMinutes * 60
+        let secondsFromDays = max(intervalDays, 0) * 86400
+        let secondsFromHours = max(intervalHours, 0) * 3600
+        let secondsFromMinutes = max(intervalMinutes, 0) * 60
         return TimeInterval(secondsFromDays + secondsFromHours + secondsFromMinutes)
     }
     
@@ -150,6 +151,8 @@ class CountdownEntry {
     // MARK: - Notification
     
     /// Schedules a notification for when the countdown is ready again.
+    /// Call this whenever the countdown's lastReset date or interval changes.
+    /// For example, after resetting, editing interval, or creating a new CountdownEntry.
     func scheduleNotification() {
         guard notifyOnReady else { return }
         let triggerDate = nextAvailableDate
