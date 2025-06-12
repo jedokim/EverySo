@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var entryToEdit: CountdownEntry?
     @StateObject private var clock = Clock()
     @State private var isDarkMode: Bool = UserDefaults.standard.bool(forKey: "isDarkMode")
+    @State private var isSidebarVisible: Bool = false
 
     /// Navigation toolbar with theme toggle and add entry button.
     private var toolbar: some ToolbarContent {
@@ -30,6 +31,15 @@ struct ContentView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isSidebarVisible.toggle()
+                    }
+                }) {
+                    Image(systemName: "sidebar.leading")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink(destination: AddEntryView()) {
                     Image(systemName: "plus")
                 }
@@ -38,23 +48,42 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(entries, id: \.id) { entry in
-                    CountdownRowView(entry: entry, clock: clock, isDarkMode: isDarkMode, entryToEdit: $entryToEdit)
+        ZStack(alignment: .leading) {
+            NavigationStack {
+                List {
+                    ForEach(entries, id: \.id) { entry in
+                        CountdownRowView(entry: entry, clock: clock, isDarkMode: isDarkMode, entryToEdit: $entryToEdit)
+                    }
+                    .onDelete(perform: deleteEntry)
                 }
-                .onDelete(perform: deleteEntry)
+                .listStyle(.plain)
+                .navigationTitle("EverySo")
+                .toolbar { toolbar }
+                .sheet(item: $entryToEdit) { entry in
+                    AddEntryView(entryToEdit: entry)
+                }
             }
-            .listStyle(.plain)
-            .navigationTitle("EverySo")
-            .toolbar { toolbar }
-            // Present AddEntryView when editing an entry
-            .sheet(item: $entryToEdit) { entry in
-                AddEntryView(entryToEdit: entry)
+            .background(Color(isDarkMode ? .black : .white).edgesIgnoringSafeArea(.all))
+            .preferredColorScheme(isDarkMode ? .dark : .light)
+
+            ZStack(alignment: .leading) {
+                if isSidebarVisible {
+                    Color.black.opacity(0.3)
+                        .edgesIgnoringSafeArea(.all)
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isSidebarVisible = false
+                            }
+                        }
+                }
+                SideBarView()
+                    .frame(width: 250)
+                    .background(Color(.systemGray6))
+                    .offset(x: isSidebarVisible ? 0 : -250)
+                    .opacity(isSidebarVisible ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.3), value: isSidebarVisible)
             }
         }
-        .background(Color(isDarkMode ? .black : .white).edgesIgnoringSafeArea(.all))
-        .preferredColorScheme(isDarkMode ? .dark : .light)
     }
 
     private func deleteEntry(at offsets: IndexSet) {
@@ -67,4 +96,23 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(for: CountdownEntry.self)
+}
+
+struct SideBarView: View {
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Menu")
+                .font(.headline)
+                .padding(.top, 100)
+            Divider()
+            Button("First Option") { }
+                .padding(.vertical, 10)
+            Button("Second Option") { }
+                .padding(.vertical, 10)
+            Spacer()
+        }
+        .padding(.horizontal)
+        .frame(maxHeight: .infinity)
+        .background(Color(.systemGray6))
+    }
 }
