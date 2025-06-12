@@ -24,19 +24,19 @@ struct ContentView: View {
         Group {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    isDarkMode.toggle()
-                    UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
-                }) {
-                    Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         isSidebarVisible.toggle()
                     }
                 }) {
                     Image(systemName: "sidebar.leading")
+                }
+            }
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    isDarkMode.toggle()
+                    UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
+                }) {
+                    Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -66,23 +66,7 @@ struct ContentView: View {
             .background(Color(isDarkMode ? .black : .white).edgesIgnoringSafeArea(.all))
             .preferredColorScheme(isDarkMode ? .dark : .light)
 
-            ZStack(alignment: .leading) {
-                if isSidebarVisible {
-                    Color.black.opacity(0.3)
-                        .edgesIgnoringSafeArea(.all)
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                isSidebarVisible = false
-                            }
-                        }
-                }
-                SideBarView()
-                    .frame(width: 250)
-                    .background(Color(.systemGray6))
-                    .offset(x: isSidebarVisible ? 0 : -250)
-                    .opacity(isSidebarVisible ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.3), value: isSidebarVisible)
-            }
+            SidebarContainerView(isSidebarVisible: $isSidebarVisible)
         }
     }
 
@@ -96,23 +80,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(for: CountdownEntry.self)
-}
-
-struct SideBarView: View {
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Menu")
-                .font(.headline)
-                .padding(.top, 100)
-            Divider()
-            Button("First Option") { }
-                .padding(.vertical, 10)
-            Button("Second Option") { }
-                .padding(.vertical, 10)
-            Spacer()
-        }
-        .padding(.horizontal)
-        .frame(maxHeight: .infinity)
-        .background(Color(.systemGray6))
-    }
 }
