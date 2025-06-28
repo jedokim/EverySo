@@ -92,6 +92,8 @@ struct AddEntryView: View {
                     if resetOnSave {
                         existing.lastReset = Date()
                         existing.resetCountdown()
+                    } else {
+                        existing.scheduleNotification()
                     }
                 } else {
                     let newEntry = CountdownEntry(
@@ -104,6 +106,7 @@ struct AddEntryView: View {
                     newEntry.notifyOnReady = notifyOnReady
                     newEntry.resetOnSave = resetOnSave
                     modelContext.insert(newEntry)
+                    newEntry.scheduleNotification()
                 }
                 do {
                     try modelContext.save()
