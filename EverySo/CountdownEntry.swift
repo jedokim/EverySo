@@ -154,6 +154,9 @@ class CountdownEntry {
     /// Call this whenever the countdown's lastReset date or interval changes.
     /// For example, after resetting, editing interval, or creating a new CountdownEntry.
     func scheduleNotification() {
+        // Remove any existing notification for this countdown in case
+        // the schedule or notification preference changed.
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id.uuidString])
         guard notifyOnReady else { return }
         let triggerDate = nextAvailableDate
         guard triggerDate > Date() else { return }
